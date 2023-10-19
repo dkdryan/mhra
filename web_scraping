@@ -84,57 +84,51 @@ for index, i in enumerate(drugs):
     time.sleep(5)
     driver.quit()
 
-def drug_name(file_name): 
-    reader = csv.reader(open(file_name))
-
-    result = {}
-    for row in reader:
-        key = row[0]
-        if key in result:
-            # implement your duplicate row handling here
-            pass
-        result[key] = row[1:]
-    return(str(result['DRUG_NAME']).strip("['']"))
+def get_drug_name(file_name): 
+    df = pd.read_csv(f'/Users/davidryan/Downloads/MHRA_23/{file_name}/{file_name}_info.csv')
+    value = df.loc[df['ITEM'] == 'DRUG_NAME', 'VALUE'].tolist()
+    clean = str(value).strip("[' ']")
+    return(clean)
 
 import os
 import zipfile
 
-for file in os.listdir():
-    if file == ".DS_Store":
-        continue  # Skip the ".DS_Store" file
+for file in os.listdir(): 
+    if file[-4:] != '.zip': 
+        print(file)
+        pass 
+    else: 
+        print(file)
 
-    print(file)
-
-    if file.endswith(".zip"):  # Check if the file is a ZIP file
         dir_name = os.path.splitext(file)[0]  # Remove the ".zip" extension
         os.makedirs(dir_name, exist_ok=True)  # Create the directory if it doesn't exist
 
         with zipfile.ZipFile(file, 'r') as zip_ref:
             zip_ref.extractall(dir_name)
     
-    #rename folder 
-    drug_name = drug_name(f'/Users/davidryan/Downloads/MHRA_23/{dir_name}/{dir_name}_info.csv')
-    os.rename(dir_name, drug_name)
+        #rename folder 
+        drug_name = get_drug_name(f'{dir_name}')
+        os.rename(dir_name, drug_name)
     
-    #tidy files 
-    try: 
-        os.remove(dir_name)
-    except: 
-        pass 
+        #tidy files 
+        try: 
+            os.remove(dir_name)
+        except: 
+            pass 
     
-    try: 
-        os.remove(f'{dir_name}.zip')
-    except: 
-        pass 
+        try: 
+            os.remove(f'{dir_name}.zip')
+        except: 
+            pass 
     
     #rename files 
 
-    os.remove(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/mhra_idap_csv_help.txt')
-    os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_case.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_case.csv')
-    os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_drug.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_drug.csv')
-    os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_event.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_event.csv')
-    os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_info.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_info.csv')
-    os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_summary.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_summary.csv')
+        os.remove(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/mhra_idap_csv_help.txt')
+        os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_case.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_case.csv')
+        os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_drug.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_drug.csv')
+        os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_event.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_event.csv')
+        os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_info.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_info.csv')
+        os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_summary.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_summary.csv')
     
                      
 
