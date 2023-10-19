@@ -1,0 +1,32 @@
+skipped = []
+df = pd.DataFrame({'symptoms': ['0'], 'count': np.nan})
+for index, folder in enumerate(os.listdir()): 
+    if folder == '_ANALYSIS': 
+        pass
+    else: 
+        
+        try:
+            print(folder, index)
+        
+            case = pd.read_csv(f"{folder}/{folder}_case.csv")
+            event = pd.read_csv(f"{folder}/{folder}_event.csv")
+            merged = pd.merge(case, event, how='left', on='ADR')
+        
+            serious = merged[merged['NONSERIOUS_SERIOUS_FATAL_NSF']!='N']
+            year = serious[serious['RECVD_YEAR']>=1998]
+            symptoms = list(year['PT'])
+            symptom_set = set(symptoms)
+        
+            symptom_dict = {'symptoms': '0'}
+            for symptom in symptom_set:
+                number = symptoms.count(symptom)
+                symptom_dict[symptom] = number
+            
+            output = pd.DataFrame.from_dict(symptom_dict, orient='index')
+            output = output.reset_index()
+            output.columns = ['symptoms', f'{folder}_count']
+            df = pd.merge(df, output, how='outer', on='symptoms')
+            
+        except: 
+            print('skipped')
+            skipped.append(folder)
