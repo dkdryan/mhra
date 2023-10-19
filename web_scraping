@@ -1,0 +1,143 @@
+import pandas as pd 
+import numpy as np 
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time 
+
+# set up a directory dictionary 
+directory = ['0_9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+directory_dict = {}
+
+for index, name in enumerate(directory): 
+    parent_div = driver.find_element_by_id(f"top_index_level_{name}")
+    child_divs = parent_div.find_elements_by_tag_name("div")
+    div_count = len(child_divs)
+    directory_dict[name] = div_count
+    
+# set up a list of urls 
+
+drug_urls = []
+
+driver = webdriver.Chrome()
+driver.get('https://yellowcard.mhra.gov.uk/idaps')
+driver.switch_to.frame(0)
+
+for index, name in enumerate(directory): 
+    print(index+1, name)
+    i = index+1
+    
+    time.sleep(5)
+    element = driver.find_element(By.XPATH, f'//*[@id="top_index_level"]/div[{i}]')
+    element.click()
+    time.sleep(2)
+    
+    all_links = driver.find_elements_by_tag_name("a")
+    
+    for link in all_links:
+            drug_urls.append(link.get_attribute("href"))
+    
+    
+    if directory_dict[name] == 1:
+        pass 
+        
+    else:  
+        
+        for a in range(2, directory_dict[name]+1): 
+            print(name, a)
+            time.sleep(2)
+            elm = driver.find_element(By.XPATH, f'//*[@id="top_index_level_{name}"]/div[{a}]')
+            elm.click()
+            
+            all_links = driver.find_elements_by_tag_name("a")
+            
+            for link in all_links:
+                drug_urls.append(link.get_attribute("href"))
+            
+            time.sleep(5)
+
+driver.quit()
+
+len(list(dict.fromkeys(drug_urls)))
+
+drugs = list(dict.fromkeys(drug_urls))
+
+with open(r'urls.txt', 'w') as fp:
+    for item in drugs:
+    # write each item on a new line
+    fp.write("%s\n , " % item)
+    print('Done')
+
+from selenium import webdriver
+
+chrome_options = webdriver.ChromeOptions()
+prefs = {'download.default_directory' : "/Users/davidryan/Downloads/MHRA_23"}
+chrome_options.add_experimental_option('prefs', prefs)
+
+for index, i in enumerate(drugs): 
+    print(index)
+    driver = webdriver.Chrome(chrome_options=chrome_options)
+    driver.get(i)
+    time.sleep(5)
+    element = driver.find_element(By.XPATH, '//*[@id="dap_footer_download_data_link"]/a')
+    time.sleep(5)
+    element.click()
+    time.sleep(5)
+    driver.quit()
+
+def drug_name(file_name): 
+    reader = csv.reader(open(file_name))
+
+    result = {}
+    for row in reader:
+        key = row[0]
+        if key in result:
+            # implement your duplicate row handling here
+            pass
+        result[key] = row[1:]
+    return(str(result['DRUG_NAME']).strip("['']"))
+
+import os
+import zipfile
+
+for file in os.listdir():
+    if file == ".DS_Store":
+        continue  # Skip the ".DS_Store" file
+
+    print(file)
+
+    if file.endswith(".zip"):  # Check if the file is a ZIP file
+        dir_name = os.path.splitext(file)[0]  # Remove the ".zip" extension
+        os.makedirs(dir_name, exist_ok=True)  # Create the directory if it doesn't exist
+
+        with zipfile.ZipFile(file, 'r') as zip_ref:
+            zip_ref.extractall(dir_name)
+    
+    #rename folder 
+    drug_name = drug_name(f'/Users/davidryan/Downloads/MHRA_23/{dir_name}/{dir_name}_info.csv')
+    os.rename(dir_name, drug_name)
+    
+    #tidy files 
+    try: 
+        os.remove(dir_name)
+    except: 
+        pass 
+    
+    try: 
+        os.remove(f'{dir_name}.zip')
+    except: 
+        pass 
+    
+    #rename files 
+
+    os.remove(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/mhra_idap_csv_help.txt')
+    os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_case.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_case.csv')
+    os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_drug.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_drug.csv')
+    os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_event.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_event.csv')
+    os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_info.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_info.csv')
+    os.rename(f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{dir_name}_summary.csv', f'/Users/davidryan/Downloads/MHRA_23/{drug_name}/{drug_name}_summary.csv')
+    
+                     
+
+
+
+    
